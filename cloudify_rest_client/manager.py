@@ -148,6 +148,14 @@ class ManagerItem(dict):
         """
         return self.get('fs_sync_node_id')
 
+    @property
+    def networks(self):
+        """Networks and IPs declared for this manager
+
+        :rtype: dict
+        """
+        return self.get('networks')
+
 
 class RabbitMQBrokerItem(dict):
     def __init__(self, broker):
@@ -178,6 +186,14 @@ class RabbitMQBrokerItem(dict):
     def ca_cert_content(self):
         """Content of the CA cert to use for connecting to this broker"""
         return self.get('ca_cert_content')
+
+    @property
+    def networks(self):
+        """Networks and IPs declared for this broker
+
+        :rtype: dict
+        """
+        return self.get('networks')
 
 
 class ManagerClient(object):

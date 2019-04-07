@@ -37,6 +37,14 @@ node_templates:
   node5:
     type: cloudify.nodes.Root
 
+  depends_on_operation_node:
+    type: cloudify.nodes.Root
+    relationships:
+      - type: depends_on_operation
+        target: main_compute
+        properties:
+          operation: configure
+
   depends:
     type: cloudify.nodes.Root
     relationships:
@@ -59,6 +67,10 @@ relationships:
 
   contained_in:
     derived_from: cloudify.relationships.contained_in
+    <<: *relationship_interfaces
+
+  depends_on_operation:
+    derived_from: cloudify.relationships.depends_on_operation
     <<: *relationship_interfaces
 
 plugins:

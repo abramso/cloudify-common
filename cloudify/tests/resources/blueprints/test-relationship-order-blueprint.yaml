@@ -36,14 +36,22 @@ node_templates:
 
   node5:
     type: cloudify.nodes.Root
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure: p.cloudify.tests.test_builtin_workflows.node_operation
+        create: p.cloudify.tests.test_builtin_workflows.node_operation
 
   depends_on_operation_node:
     type: cloudify.nodes.Root
     relationships:
-      - type: depends_on_operation
-        target: main_compute
+      - type: cloudify.relationships.depends_on_operation
+        target: node5
         properties:
-          operation: configure
+          operation: create
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure: p.cloudify.tests.test_builtin_workflows.node_operation
+        create: p.cloudify.tests.test_builtin_workflows.node_operation
 
   depends:
     type: cloudify.nodes.Root
@@ -69,9 +77,6 @@ relationships:
     derived_from: cloudify.relationships.contained_in
     <<: *relationship_interfaces
 
-  depends_on_operation:
-    derived_from: cloudify.relationships.depends_on_operation
-    <<: *relationship_interfaces
 
 plugins:
   p:

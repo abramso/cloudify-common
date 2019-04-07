@@ -553,7 +553,11 @@ class TestRelationshipOrderInLifecycleWorkflows(testtools.TestCase):
         self._assert_invocation_order(
             workflow='install',
             expected_invocations=[
-                ('main',    'establish', 'node1'),
+                ('node5', 'create', None),
+                ('depends_on_operation_node', 'create', None),
+                ('depends_on_operation_node', 'configure', None),
+                ('node5', 'configure', None),
+                ('main', 'establish', 'node1'),
                 ('main',    'establish', 'node2'),
                 ('main',    'establish', 'main_compute'),
                 ('main',    'establish', 'node4'),
@@ -606,14 +610,18 @@ class TestRelationshipOrderInLifecycleWorkflows(testtools.TestCase):
         self.env.execute(workflow, parameters=parameters)
         main_instance = self._get_node_instance('main')
         depends_on_main = self._get_node_instance('depends')
+        node5 = self._get_node_instance('node5')
+        depends_on_op = self._get_node_instance('depends_on_operation_node')
         invocations = main_instance.runtime_properties['invocations']
         invocations += depends_on_main.runtime_properties['invocations']
+        invocations += node5.runtime_properties.get('invocations', [])
+        invocations += depends_on_op.runtime_properties.get('invocations', [])
         invocations.sort(key=lambda i: i['counter'])
         for index, (node_id, op, target) in enumerate(expected_invocations):
             invocation = invocations[index]
             self.assertEqual(invocation['node_id'], node_id)
             self.assertEqual(invocation['operation'].split('.')[-1], op)
-            self.assertEqual(invocation['target_node'], target)
+            self.assertEqual(invocation.get('target_node', None), target)
         for instance in self.env.storage.get_node_instances():
             self.env.storage.update_node_instance(instance.id,
                                                   instance.version,

@@ -166,6 +166,19 @@ class LifecycleProcessor(object):
                                install=install,
                                on_dependency_added=intact_on_dependency_added)
 
+    @staticmethod
+    def _handle_dependency_creation(source_subgraph, target_subgraph, operation, target_id, graph):
+        if operation:
+            for task_subgraph in target_subgraph.graph.tasks_iter():
+                if task_subgraph.cloudify_context:
+                    normalized_task_name = task_subgraph.cloudify_context["operation"]["name"].split(".")[-1]
+                    target_node_name = task_subgraph.cloudify_context["node_name"]
+                    if normalized_task_name == operation and target_id.startswith(target_node_name):
+                        target_subgraph = task_subgraph
+                        break
+
+        graph.add_dependency(source_subgraph, target_subgraph)
+
     def _add_dependencies(self, graph, subgraphs, instances, install,
                           on_dependency_added=None):
         subgraph_sequences = dict(
@@ -184,9 +197,18 @@ class LifecycleProcessor(object):
                     operation = rel.relationship.properties.get("operation", None)
 
                     if install:
-                        graph.add_dependency(source_subgraph, target_subgraph, operation)
+                        self._handle_dependency_creation(source_subgraph,
+                                                          target_subgraph,
+                                                          operation,
+                                                          rel.target_id,
+                                                          graph)
                     else:
-                        graph.add_dependency(target_subgraph, source_subgraph, operation)
+                        self._handle_dependency_creation(target_subgraph,
+                                                          source_subgraph,
+                                                          operation,
+                                                          instance.id,
+                                                          graph)
+
                     if on_dependency_added:
                         task_sequence = subgraph_sequences[instance.id]
                         on_dependency_added(instance, rel, task_sequence)

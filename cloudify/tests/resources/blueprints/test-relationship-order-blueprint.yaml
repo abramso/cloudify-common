@@ -40,6 +40,7 @@ node_templates:
       cloudify.interfaces.lifecycle:
         configure: p.cloudify.tests.test_builtin_workflows.node_operation
         create: p.cloudify.tests.test_builtin_workflows.node_operation
+        start: p.cloudify.tests.test_builtin_workflows.node_operation
 
   depends_on_operation_node:
     type: cloudify.nodes.Root
@@ -47,7 +48,7 @@ node_templates:
       - type: cloudify.relationships.depends_on_operation
         target: node5
         properties:
-          operation: configure
+          operation: create
     interfaces:
       cloudify.interfaces.lifecycle:
         configure: p.cloudify.tests.test_builtin_workflows.node_operation

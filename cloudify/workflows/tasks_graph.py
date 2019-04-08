@@ -159,7 +159,8 @@ class TaskDependencyGraph(object):
             for task in dst_task.graph.tasks_iter():
                 if task.cloudify_context:
                     normalized_task_name = task.cloudify_context["operation"]["name"].split(".")[-1]
-                    if normalized_task_name == operation:
+                    target_node_name = task.cloudify_context["node_name"]
+                    if normalized_task_name == operation and target_node_name == 'node5':
                         dst_task = task
                         break
 

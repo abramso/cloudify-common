@@ -138,7 +138,7 @@ class TaskDependencyGraph(object):
             self.graph.remove_node(task.id)
 
     # src depends on dst
-    def add_dependency(self, src_task, dst_task):
+    def add_dependency(self, src_task, dst_task, operation=None):
         """
         Add a dependency between tasks.
         The source task will only be executed after the target task terminates.
@@ -154,6 +154,15 @@ class TaskDependencyGraph(object):
         if not self.graph.has_node(dst_task.id):
             raise RuntimeError('destination task {0} is not in graph (task '
                                'id: {1})'.format(dst_task, dst_task.id))
+
+        if operation:
+            for task in dst_task.graph.tasks_iter():
+                if task.cloudify_context:
+                    normalized_task_name = task.cloudify_context["operation"]["name"].split(".")[-1]
+                    if normalized_task_name == operation:
+                        dst_task = task
+                        break
+
         self.graph.add_edge(src_task.id, dst_task.id)
 
     def sequence(self):
@@ -451,8 +460,8 @@ class SubgraphTask(tasks.WorkflowTask):
     def remove_task(self, task):
         self.graph.remove_task(task)
 
-    def add_dependency(self, src_task, dst_task):
-        self.graph.add_dependency(src_task, dst_task)
+    def add_dependency(self, src_task, dst_task, opeartion=None):
+        self.graph.add_dependency(src_task, dst_task, opeartion)
 
     def apply_async(self):
         if not self.tasks:

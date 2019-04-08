@@ -180,10 +180,13 @@ class LifecycleProcessor(object):
                         rel.target_node_instance in self.intact_nodes):
                     source_subgraph = subgraphs[instance.id]
                     target_subgraph = subgraphs[rel.target_id]
+
+                    operation = rel.relationship.properties.get("operation", None)
+
                     if install:
-                        graph.add_dependency(source_subgraph, target_subgraph)
+                        graph.add_dependency(source_subgraph, target_subgraph, operation)
                     else:
-                        graph.add_dependency(target_subgraph, source_subgraph)
+                        graph.add_dependency(target_subgraph, source_subgraph, operation)
                     if on_dependency_added:
                         task_sequence = subgraph_sequences[instance.id]
                         on_dependency_added(instance, rel, task_sequence)
@@ -225,7 +228,6 @@ def install_node_instance_subgraph(instance, graph, **kwargs):
     """
     subgraph = graph.subgraph('install_{0}'.format(instance.id))
     sequence = subgraph.sequence()
-    tasks = []
     creation_validation = _skip_nop_operations(
         pre=instance.send_event('Validating node instance before creation'),
         task=instance.execute_operation(

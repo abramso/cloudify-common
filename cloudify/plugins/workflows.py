@@ -667,6 +667,8 @@ def update(ctx,
            ignore_failure=False,
            install_first=False,
            node_instances_to_reinstall=None,
+           central_plugins_to_install=None,
+           central_plugins_to_uninstall=None,
            update_plugins=True):
     node_instances_to_reinstall = node_instances_to_reinstall or []
     instances_by_change = {

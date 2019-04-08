@@ -102,13 +102,40 @@ class TestPluginFunctions(unittest.TestCase):
                 dep_plugins, wf_plugins, lambda x: x['dummy'] == 2)
             merge_plugins_mock.assert_called_with(dep_plugins[1:], wf_plugins)
 
-    def test_merge_is_correct(self):
+    def test_empty_plugin_lists(self):
+        dep_plugins = []
+        wf_plugins = []
+        self.assertEqual([], merge_plugins(deployment_plugins=dep_plugins,
+                                           workflow_plugins=wf_plugins))
+
+    def test_empty_dep_plugin_list(self):
+        dep_plugins = []
+        wf_plugins = [{'name': 'one'}]
+        self.assertEqual([{'name': 'one'}],
+                         merge_plugins(deployment_plugins=dep_plugins,
+                                       workflow_plugins=wf_plugins))
+
+    def test_empty_workflow_plugin_list(self):
+        dep_plugins = [{'name': 'one'}]
+        wf_plugins = []
+        self.assertEqual([{'name': 'one'}],
+                         merge_plugins(deployment_plugins=dep_plugins,
+                                       workflow_plugins=wf_plugins))
+
+    def test_merge_no_duplicates(self):
         deployment_plugins = [{PLUGIN_NAME_KEY: 'dummy{}'.format(i)}
                               for i in range(3)]
         workflow_plugins = deployment_plugins + [{PLUGIN_NAME_KEY: 'dummy3'}]
         result = merge_plugins(deployment_plugins, workflow_plugins)
         # Checks that no duplicates are made
         self.assertListEqual(result, workflow_plugins)
+
+    def test_plugin_lists_with_duplicates(self):
+        dep_plugins = [{'name': 'one'}]
+        wf_plugins = [{'name': 'one'}]
+        self.assertEqual([{'name': 'one'}],
+                         merge_plugins(deployment_plugins=dep_plugins,
+                                       workflow_plugins=wf_plugins))
 
     def test_extract_and_merge_to_uninstall_executes_correctly(self):
         dep_plugins = [{PLUGIN_INSTALL_KEY: True, 'dummy': 1},
